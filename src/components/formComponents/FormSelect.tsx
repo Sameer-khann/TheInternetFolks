@@ -32,6 +32,12 @@ const FormSelect: React.FC<IFormSelectProps> = ({
   const handleChange = (value: any) => {
     onChange && onChange(name, value?.value);
   };
+
+  // const handleChange = (selectedOption: { label: string; value: string }) => {
+  //   onChange && onChange(name, selectedOption?.value);  // Pass the value directly
+  // };
+  
+  
   const handleBlur = () => {
     onBlur && onBlur(name, true);
   };

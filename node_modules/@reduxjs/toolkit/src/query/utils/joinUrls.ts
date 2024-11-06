@@ -5,7 +5,7 @@ const withoutLeadingSlash = (url: string) => url.replace(/^\//, '')
 
 export function joinUrls(
   base: string | undefined,
-  url: string | undefined
+  url: string | undefined,
 ): string {
   if (!base) {
     return url!
@@ -18,8 +18,9 @@ export function joinUrls(
     return url
   }
 
+  const delimiter = base.endsWith('/') || !url.startsWith('?') ? '/' : ''
   base = withoutTrailingSlash(base)
   url = withoutLeadingSlash(url)
 
-  return `${base}/${url}`
+  return `${base}${delimiter}${url}`
 }

@@ -8,9 +8,30 @@ import { PageNumbers } from "../../interface/home";
 import { IRequisitionDetails } from "../../interface/forms";
 import { genderOptions, urgencyOptions } from "./constants";
 
+import { useDispatch, useSelector } from "react-redux";
+import { setRequisitionDetails } from "../../redux/formSlice";
+
 const RequisitionDetailsForm: React.FC<{
   handleTab: (n: PageNumbers) => void;
 }> = ({ handleTab }) => {
+  const dispatch = useDispatch();
+  const requisitionDetails = useSelector(
+    (state: any) => state.form.requisitionDetails
+  );
+
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    dispatch(
+      setRequisitionDetails({
+        ...requisitionDetails,
+        [name]: value,
+      })
+    );
+  };
+
   const {
     handleChange,
     errors,
@@ -23,10 +44,10 @@ const RequisitionDetailsForm: React.FC<{
     isValid,
   } = useFormik<IRequisitionDetails>({
     initialValues: {
-      requisitionTitle: "",
-      noOfOpenings: 0,
-      urgency: "",
-      gender: "",
+      requisitionTitle: requisitionDetails.requisitionTitle || "",
+      noOfOpenings: requisitionDetails.noOfOpenings || 0,
+      urgency: requisitionDetails.urgency || "",
+      gender: requisitionDetails.gender || "",
     },
     validationSchema: Yup.object().shape({
       requisitionTitle: Yup.string().required("Requisition title is required"),
@@ -39,6 +60,7 @@ const RequisitionDetailsForm: React.FC<{
       gender: Yup.string().required("Gender is required"),
     }),
     onSubmit: (values) => {
+      dispatch(setRequisitionDetails(values));
       handleTab(1);
     },
   });
@@ -50,7 +72,10 @@ const RequisitionDetailsForm: React.FC<{
           label="Requisition Title"
           placeholder="Enter requisition title"
           name="requisitionTitle"
-          onChange={handleChange}
+          onChange={(e) => {
+            handleChange(e);
+            handleInputChange(e);
+          }}
           onBlur={handleBlur}
           value={values?.requisitionTitle}
           error={errors?.requisitionTitle}
@@ -60,7 +85,10 @@ const RequisitionDetailsForm: React.FC<{
           label="Number of openings"
           placeholder="Enter number of openings"
           name="noOfOpenings"
-          onChange={handleChange}
+          onChange={(e) => {
+            handleChange(e);
+            handleInputChange(e);
+          }}
           onBlur={handleBlur}
           value={values?.noOfOpenings}
           error={errors?.noOfOpenings}
@@ -71,18 +99,31 @@ const RequisitionDetailsForm: React.FC<{
           name="gender"
           placeholder="Select gender"
           options={genderOptions}
-          onChange={setFieldValue}
+          onChange={(selectedOption: { value: string; label: string }) => {
+            console.log("Selected Gender Object from FORM: ", selectedOption); // Logs the full object
+            if (selectedOption && selectedOption.value) {
+              setFieldValue("gender", selectedOption.value); // Pass the value to the form field
+              console.log(
+                "Selected Gender Value from FORM: ",
+                selectedOption.value
+              ); // Logs just the value
+            }
+          }}
           onBlur={setFieldTouched}
           error={errors.gender}
           touched={touched.gender}
-          value={values.gender}
+          value={values.gender} // Ensure values.gender exists and is initialized
         />
+
         <FormSelect
           label="Urgency"
           name="urgency"
           placeholder="Select urgency"
           options={urgencyOptions}
-          onChange={setFieldValue}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            setFieldValue("urgency", e.target.value);
+            handleInputChange(e);
+          }}
           onBlur={setFieldTouched}
           error={errors.urgency}
           touched={touched.urgency}
